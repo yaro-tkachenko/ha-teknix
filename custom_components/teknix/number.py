@@ -1,8 +1,15 @@
 from __future__ import annotations
 
 from homeassistant.components.number import NumberEntity, NumberMode
+from homeassistant.const import UnitOfTemperature
 from homeassistant.helpers.entity import DeviceInfo
+
 from .const import DOMAIN
+from .commands import (
+    build_power_command,
+    build_house_temp_command,
+    build_tank_temp_command,
+)
 
 TARGETS = [
     {
@@ -45,7 +52,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
 class BaseTeknixNumber(NumberEntity):
     _attr_has_entity_name = True
-    _attr_mode = NumberMode.BOX  # можна поміняти на SLIDER
+    _attr_mode = NumberMode.BOX
 
     def __init__(self, hub, entry_id: str, key: str, name: str):
         self._hub = hub
@@ -53,10 +60,7 @@ class BaseTeknixNumber(NumberEntity):
         self._key = key
         self._attr_name = name
         self._attr_unique_id = f"{DOMAIN}:{entry_id}:num:{key}"
-
-    @property
-    def device_info(self) -> DeviceInfo:
-        return DeviceInfo(
+        self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, getattr(self._hub, "serial", self._entry_id))},
             manufacturer="Teknix",
             model=getattr(self._hub, "model", None),
@@ -66,6 +70,9 @@ class BaseTeknixNumber(NumberEntity):
 
 
 class TeknixTargetTempNumber(BaseTeknixNumber):
+    _attr_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_device_class = "temperature"
+
     def __init__(self, hub, entry_id: str, cfg: dict):
         super().__init__(hub, entry_id, cfg["key"], cfg["name"])
         self._min = cfg["min"]
@@ -90,8 +97,24 @@ class TeknixTargetTempNumber(BaseTeknixNumber):
         return int(self._hub.state.get(self._key, self._min))
 
     async def async_set_native_value(self, value: float) -> None:
-        # TODO: тут надішли MQTT команду на зміну цільової температури
-        self._hub.state[self._key] = int(value)
+        t = int(round(value))
+        if t < self._min:
+            t = self._min
+        if t > self._max:
+            t = self._max
+
+        if self._key == "house_target_temp":
+            cmd = build_house_temp_command(t) 
+        else:
+            cmd = build_tank_temp_command(t)
+
+        await self._hub.publish(cmd)
+        # mark this key as pending to suppress racing telemetry for a short time
+        if hasattr(self._hub, "set_pending"):
+            self._hub.set_pending(self._key, t)
+
+        # локально оновлюємо стан (HA потім перепише з телеметрії)
+        self._hub.state[self._key] = t
         self.async_write_ha_state()
 
 
@@ -123,6 +146,30 @@ class TeknixPowerStepNumber(BaseTeknixNumber):
 
     async def async_set_native_value(self, value: float) -> None:
         v = int(round(value))
-        v = max(1, min(v, int(self.native_max_value)))
+        maxv = int(self.native_max_value)
+        if v < 1:
+            v = 1
+        if v > maxv:
+            v = maxv
+
+        house_step = int(self._hub.state.get("house_power_step", 1))
+        tank_step = int(self._hub.state.get("tank_power_step", 1))
+
+        if self._key == "house_power_step":
+            house_step = v
+        else:
+            tank_step = v
+
+        other_max = maxv
+        house_step = max(1, min(int(house_step), other_max))
+        tank_step = max(1, min(int(tank_step), other_max))
+
+        cmd = build_power_command(house_step, tank_step)
+        await self._hub.publish(cmd)
+        
+        if hasattr(self._hub, "set_pending"):
+            self._hub.set_pending("house_power_step", house_step)
+            self._hub.set_pending("tank_power_step", tank_step)
+
         self._hub.state[self._key] = v
         self.async_write_ha_state()

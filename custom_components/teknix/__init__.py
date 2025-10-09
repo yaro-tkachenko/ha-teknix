@@ -1,5 +1,6 @@
 from __future__ import annotations
 import logging
+import time
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import device_registry as dr
@@ -25,6 +26,10 @@ class TeknixHub:
         self.state: dict = {}
         self.device_id: str | None = None
         self._unsub_mqtt = None
+        
+        # Pending overrides to suppress brief MQTT races after local writes
+        self._pending_until: dict[str, float] = {}
+        self._pending_values: dict[str, object] = {}
 
     async def async_start(self) -> None:
         topic = tele_topic(self.serial)
@@ -52,14 +57,48 @@ class TeknixHub:
         if not parsed:
             return
 
-        
-        self.state = parsed
-        
+        # Merge parsed telemetry into state, but respect pending suppressions
+        now = time.monotonic()
+        new_state = dict(self.state)
+
+        # Cleanup expired pending entries
+        expired_keys = [k for k, ts in self._pending_until.items() if ts <= now]
+        for k in expired_keys:
+            self._pending_until.pop(k, None)
+            self._pending_values.pop(k, None)
+
+        for key, value in parsed.items():
+            pending_ts = self._pending_until.get(key)
+            if pending_ts is not None and now < pending_ts:
+                pending_value = self._pending_values.get(key)
+                # If telemetry differs during the pending window, ignore it
+                if pending_value is not None and pending_value != value:
+                    continue
+                # If telemetry matches our pending value, accept and clear pending
+                if pending_value == value:
+                    self._pending_until.pop(key, None)
+                    self._pending_values.pop(key, None)
+            new_state[key] = value
+
+        self.state = new_state
+
         async_dispatcher_send(self.hass, f"{DISPATCH_SIGNAL}_{self.entry_id}")
 
     async def async_send_command(self, raw_cmd: str) -> None:
         topic = cmd_topic(self.serial)
         await mqtt.async_publish(self.hass, topic, raw_cmd)
+
+    # Alias used by entities
+    async def publish(self, raw_cmd: str) -> None:
+        await self.async_send_command(raw_cmd)
+
+    def set_pending(self, key: str, value: object, ttl: float = 2.0) -> None:
+        """Mark a key as locally overridden for a brief period to avoid races.
+
+        During the TTL, incoming differing telemetry for this key will be ignored.
+        """
+        self._pending_until[key] = time.monotonic() + max(0.1, float(ttl))
+        self._pending_values[key] = value
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

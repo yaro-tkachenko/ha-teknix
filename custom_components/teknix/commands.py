@@ -1,4 +1,3 @@
-# custom_components/teknix_boiler/commands.py
 from __future__ import annotations
 
 def build_power_command(house_step: int, tank_step: int) -> str:
@@ -27,16 +26,26 @@ def build_tank_temp_command(temp_c: int) -> str:
     suffix_dec = f"{9 + tens + ones:02d}"
     return f"T09{temp_c:02d}00{suffix_dec}Z"
 
+# --- switch command builders ---
+
+def build_boiler_power_command(turn_on: bool) -> str:
+    return "T01010002Z" if turn_on else "T01000001Z"
+
+
+def build_house_heating_active_command(turn_on: bool) -> str:
+    return "T120111010007Z" if turn_on else "T120011010006Z"
+
+
+def build_tank_heating_active_command(turn_on: bool) -> str:
+    return "T13010005Z" if turn_on else "T13000004Z"
+
+# --- helpers ---
 
 def _validate_step(step: int) -> None:
-    if not isinstance(step, int):
-        raise ValueError("Step must be an integer.")
     if not (1 <= step <= 6):
         raise ValueError("Step must be in range 1..6.")
 
 
 def _validate_temp(temp_c: int) -> None:
-    if not isinstance(temp_c, int):
-        raise ValueError("Temperature must be an integer.")
     if not (30 <= temp_c <= 80):
         raise ValueError("Temperature must be in range 30..80 °C.")

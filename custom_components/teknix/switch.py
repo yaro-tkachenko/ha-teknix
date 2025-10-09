@@ -1,4 +1,3 @@
-# switch.py
 from __future__ import annotations
 import logging
 
@@ -14,6 +13,11 @@ from homeassistant.helpers.dispatcher import (
 )
 
 from .const import DOMAIN, DISPATCH_SIGNAL
+from .commands import (
+    build_boiler_power_command,
+    build_house_heating_active_command,
+    build_tank_heating_active_command,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -26,7 +30,7 @@ SWITCH_DESCS: list[SwitchEntityDescription] = [
 async def async_setup_entry(hass, entry, async_add_entities):
     hub = hass.data[DOMAIN][entry.entry_id]
     entities = [TeknixSwitch(hub, entry.entry_id, d) for d in SWITCH_DESCS]
-    _LOGGER.warning("Teknix.switch: adding %d switches", len(entities))
+    _LOGGER.debug("Teknix.switch: adding %d switches", len(entities))
     async_add_entities(entities, True)
 
 class TeknixSwitch(SwitchEntity):
@@ -39,21 +43,21 @@ class TeknixSwitch(SwitchEntity):
         self._attr_unique_id = f"{DOMAIN}:{entry_id}:sw:{desc.key}"
         self._attr_name = desc.name
         self._unsub = None
-        _LOGGER.warning("Teknix.switch entity init: %s", self._attr_unique_id)
 
-    @property
-    def device_info(self) -> DeviceInfo:
-        return DeviceInfo(
+        self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, getattr(self._hub, "serial", self._entry_id))},
             manufacturer="Teknix",
             model=getattr(self._hub, "model", None),
             name=f"Teknix {getattr(self._hub, 'model', '')}".strip(),
             sw_version=getattr(self._hub, "firmware", None),
         )
+        _LOGGER.debug("Teknix.switch entity init: %s", self._attr_unique_id)
 
     @property
     def is_on(self) -> bool:
         state = (getattr(self._hub, "state", {}) or {}).get(self.entity_description.key)
+        if isinstance(state, bool):
+            return state
         return str(state).lower() in ("1", "true", "on")
 
     async def async_turn_on(self, **kwargs):
@@ -63,8 +67,26 @@ class TeknixSwitch(SwitchEntity):
         await self._apply_state(False)
 
     async def _apply_state(self, turn_on: bool):
-        desired = 1 if turn_on else 0
-        (self._hub.state or {}).update({self.entity_description.key: desired})
+        key = self.entity_description.key
+
+        if key == "boiler_power_state":
+            cmd = build_boiler_power_command(turn_on)
+        elif key == "house_heating_active":
+            cmd = build_house_heating_active_command(turn_on)
+        elif key == "tank_heating_active":
+            cmd = build_tank_heating_active_command(turn_on)
+        else:
+            _LOGGER.warning("Unknown switch key %s, not sending command", key)
+            return
+
+        await self._hub.publish(cmd)
+        _LOGGER.debug("Sent switch cmd for %s = %s: %s", key, turn_on, cmd)
+
+        # mark this key as pending to suppress racing telemetry for a short time
+        if hasattr(self._hub, "set_pending"):
+            self._hub.set_pending(key, 1 if turn_on else 0)
+
+        (self._hub.state or {}).update({key: 1 if turn_on else 0})
         async_dispatcher_send(self.hass, f"{DISPATCH_SIGNAL}_{self._entry_id}")
         self.async_write_ha_state()
 
