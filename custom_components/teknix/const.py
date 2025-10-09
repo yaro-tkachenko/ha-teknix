@@ -35,6 +35,10 @@ def model_total_kw(model_name: str) -> float:
 def model_max_step(model_name: str) -> int:
     return min(6, MODELS[model_name]["elements_count"])
 
+def model_element_kw(model_name: str) -> float:
+    m = MODELS[model_name]
+    return float(m["element_kw"])
+
 IDX = {
     "boiler_power_state": 0,
     "house_target_temp": 1,

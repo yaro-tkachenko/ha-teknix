@@ -9,7 +9,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_send
 
 from .const import (
     DOMAIN, PLATFORMS, CONF_SERIAL, CONF_MODEL,
-    DISPATCH_SIGNAL, model_max_step, cmd_topic, tele_topic
+    DISPATCH_SIGNAL, model_max_step, cmd_topic, tele_topic, model_total_kw, model_element_kw,
 )
 from .parser import parse_info_message
 
@@ -30,6 +30,10 @@ class TeknixHub:
         # Pending overrides to suppress brief MQTT races after local writes
         self._pending_until: dict[str, float] = {}
         self._pending_values: dict[str, object] = {}
+    
+    @property
+    def element_kw(self) -> float:
+        return model_element_kw(self.model)
 
     async def async_start(self) -> None:
         topic = tele_topic(self.serial)
@@ -86,6 +90,7 @@ class TeknixHub:
 
     async def async_send_command(self, raw_cmd: str) -> None:
         topic = cmd_topic(self.serial)
+        _LOGGER.info("Sending MQTT command to %s: %s", topic, raw_cmd)
         await mqtt.async_publish(self.hass, topic, raw_cmd)
 
     # Alias used by entities
