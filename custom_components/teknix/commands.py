@@ -10,13 +10,16 @@ def build_power_command(house_step: int, tank_step: int) -> str:
     return f"T19{HH}20{WW}00{SS}Z"
 
 
-def build_house_temp_command(temp_c: int) -> str:
+def build_house_temp_command(temp_c: int, legacy_hex: bool = False) -> str:
     _validate_temp(temp_c)
 
     tens, ones = divmod(temp_c, 10)
     base = 5 + (tens - 3)
-    suffix_hex = f"{base + ones:02X}"
-    return f"T02{temp_c:02d}00{suffix_hex}Z"
+    raw = base + ones
+
+    suffix = f"{raw:02d}" if not legacy_hex else f"{raw:02X}"
+
+    return f"T02{temp_c:02d}00{suffix}Z"
 
 
 def build_tank_temp_command(temp_c: int) -> str:
