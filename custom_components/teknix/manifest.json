@@ -9,6 +9,8 @@
     "loggers": ["teknix"],
     "requirements": [],
     "dependencies": ["mqtt"],
+    "icon": "icon.png",
+    "logo": "logo.png",
     "version": "0.1.3"
   }
   
