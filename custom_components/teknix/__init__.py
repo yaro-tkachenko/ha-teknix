@@ -1,17 +1,21 @@
 from __future__ import annotations
 import logging
 import time
+from datetime import timedelta
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import device_registry as dr
 from homeassistant.components import mqtt
 from homeassistant.helpers.dispatcher import async_dispatcher_send
+from homeassistant.helpers.event import async_track_time_interval
 
 from .const import (
     DOMAIN, PLATFORMS, CONF_SERIAL, CONF_MODEL,
     DISPATCH_SIGNAL, model_max_step, cmd_topic, tele_topic, model_total_kw, model_element_kw,
+    INFO_COMMAND_INTERVAL_MINUTES,
 )
 from .parser import parse_info_message
+from .commands import build_info_command
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -26,6 +30,7 @@ class TeknixHub:
         self.state: dict = {}
         self.device_id: str | None = None
         self._unsub_mqtt = None
+        self._unsub_info_timer = None
         
         # Pending overrides to suppress brief MQTT races after local writes
         self._pending_until: dict[str, float] = {}
@@ -41,11 +46,25 @@ class TeknixHub:
         self._unsub_mqtt = await mqtt.async_subscribe(
             self.hass, topic, self._mqtt_message_received
         )
+        
+        # Start periodic INFO command sending every minute
+        self._unsub_info_timer = async_track_time_interval(
+            self.hass, self._send_info_command, timedelta(minutes=INFO_COMMAND_INTERVAL_MINUTES)
+        )
+        _LOGGER.info("Started periodic INFO command sending every minute")
+        
+        # Send initial INFO command to get current state
+        self._send_info_command()
 
     async def async_stop(self) -> None:
         if self._unsub_mqtt:
             self._unsub_mqtt()
             self._unsub_mqtt = None
+        
+        if self._unsub_info_timer:
+            self._unsub_info_timer()
+            self._unsub_info_timer = None
+            _LOGGER.info("Stopped periodic INFO command sending")
 
     @callback
     def _mqtt_message_received(self, msg) -> None:
@@ -87,6 +106,12 @@ class TeknixHub:
         self.state = new_state
 
         async_dispatcher_send(self.hass, f"{DISPATCH_SIGNAL}_{self.entry_id}")
+
+    @callback
+    def _send_info_command(self, now=None) -> None:
+        """Send INFO command to request current state from teknix."""
+        info_cmd = build_info_command()
+        self.hass.create_task(self.async_send_command(info_cmd))
 
     async def async_send_command(self, raw_cmd: str) -> None:
         topic = cmd_topic(self.serial)

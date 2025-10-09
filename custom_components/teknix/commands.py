@@ -42,6 +42,12 @@ def build_house_heating_active_command(turn_on: bool) -> str:
 def build_tank_heating_active_command(turn_on: bool) -> str:
     return "T13010005Z" if turn_on else "T13000004Z"
 
+# --- info command ---
+
+def build_info_command() -> str:
+    """Build INFO command to request current state from teknix."""
+    return "INFO"
+
 # --- helpers ---
 
 def _validate_step(step: int) -> None:
