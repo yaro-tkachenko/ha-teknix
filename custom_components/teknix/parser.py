@@ -31,17 +31,14 @@ def _extract_frame_from_payload(payload: str) -> Optional[str]:
     return None
 
 
-def parse_info_message(payload: str, *, strict: bool = True) -> Optional[Dict[str, Any]]:
+def parse_info_message(payload: str, *, strict: bool = False) -> Optional[Dict[str, Any]]:
     frame = _extract_frame_from_payload(payload)
     if not frame:
-        if strict:
-            raise ValueError("No valid 'I...Z' frame found in payload.")
         return None
     try:
         return parse_info_frame(frame)
     except ValueError:
-        if strict:
-            raise
+        # Silently ignore invalid frames to avoid error logs
         return None
 
 
@@ -52,16 +49,16 @@ def parse_info_frame(frame: str, *, idx_map: Mapping[str, int] = IDX) -> Dict[st
     parts = frame[1:-1].split("&")
     try:
         vals: List[int] = [int(x) for x in parts]
-    except ValueError as exc:
-        raise ValueError(f"Non-integer token in frame: {exc}") from exc
+    except ValueError:
+        # Silently ignore frames with non-integer tokens
+        raise ValueError("Non-integer token in frame")
 
     if not idx_map:
         raise ValueError("IDX mapping is empty.")
     max_needed = max(idx_map.values())
     if len(vals) <= max_needed:
-        raise ValueError(
-            f"Frame too short: {len(vals)} elements, but need at least {max_needed + 1}."
-        )
+        # Silently ignore frames that are too short
+        raise ValueError("Frame too short")
 
     def g(name: str, default: int = 0) -> int:
         idx = idx_map[name]
