@@ -8,6 +8,7 @@ from homeassistant.helpers import device_registry as dr
 from homeassistant.components import mqtt
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.event import async_track_time_interval
+from homeassistant.helpers.storage import Store
 
 from .const import (
     DOMAIN, PLATFORMS, CONF_SERIAL, CONF_MODEL,
@@ -32,6 +33,8 @@ class TeknixHub:
         self._unsub_mqtt = None
         self._unsub_info_timer = None
         
+        self._store = Store(hass, 1, f"{DOMAIN}.{serial}")
+        
         # Pending overrides to suppress brief MQTT races after local writes
         self._pending_until: dict[str, float] = {}
         self._pending_values: dict[str, object] = {}
@@ -41,6 +44,8 @@ class TeknixHub:
         return model_element_kw(self.model)
 
     async def async_start(self) -> None:
+        await self._async_restore_state()
+        
         topic = tele_topic(self.serial)
         _LOGGER.warning("TeknixHub subscribing to %s", topic)
         self._unsub_mqtt = await mqtt.async_subscribe(
@@ -105,6 +110,8 @@ class TeknixHub:
 
         self.state = new_state
 
+        self.hass.create_task(self._async_save_state())
+
         async_dispatcher_send(self.hass, f"{DISPATCH_SIGNAL}_{self.entry_id}")
 
     @callback
@@ -129,6 +136,23 @@ class TeknixHub:
         """
         self._pending_until[key] = time.monotonic() + max(0.1, float(ttl))
         self._pending_values[key] = value
+
+    async def _async_save_state(self) -> None:
+        """Save current state to storage."""
+        try:
+            await self._store.async_save(self.state)
+        except Exception as e:
+            _LOGGER.warning("Failed to save teknix state: %s", e)
+
+    async def _async_restore_state(self) -> None:
+        """Restore state from storage."""
+        try:
+            stored_data = await self._store.async_load()
+            if stored_data:
+                self.state = stored_data
+                _LOGGER.info("Restored teknix state from storage: %s", self.state)
+        except Exception as e:
+            _LOGGER.warning("Failed to restore teknix state: %s", e)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
