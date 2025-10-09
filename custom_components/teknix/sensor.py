@@ -18,7 +18,7 @@ class TeknixSensorDescription(SensorEntityDescription):
 SENSOR_DESCS: list[TeknixSensorDescription] = [
     TeknixSensorDescription(
         key="house_loop_temp",
-        name="House Loop Temperature",
+        translation_key="house_loop_temp",
         icon="mdi:thermometer",
         device_class=SensorDeviceClass.TEMPERATURE,
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -26,7 +26,7 @@ SENSOR_DESCS: list[TeknixSensorDescription] = [
     ),
     TeknixSensorDescription(
         key="tank_water_temp",
-        name="Tank Temperature",
+        translation_key="tank_water_temp",
         icon="mdi:thermometer",
         device_class=SensorDeviceClass.TEMPERATURE,
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -34,7 +34,7 @@ SENSOR_DESCS: list[TeknixSensorDescription] = [
     ),
     TeknixSensorDescription(
         key="house_target_temp",
-        name="House Target Temperature",
+        translation_key="house_target_temp",
         icon="mdi:home-thermometer",
         device_class=SensorDeviceClass.TEMPERATURE,
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -42,7 +42,7 @@ SENSOR_DESCS: list[TeknixSensorDescription] = [
     ),
     TeknixSensorDescription(
         key="tank_target_temp",
-        name="Tank Target Temperature",
+        translation_key="tank_target_temp",
         icon="mdi:water-thermometer",
         device_class=SensorDeviceClass.TEMPERATURE,
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -100,7 +100,7 @@ class TeknixSensor(SensorEntity):
 class TeknixCurrentConsumptionSensor(SensorEntity):
     """Diagnostic sensor: instantaneous power (kW) computed from active mode and steps."""
     _attr_has_entity_name = True
-    _attr_name = "Current Energy Consumption"
+    _attr_translation_key = "current_consumption"
     _attr_device_class = SensorDeviceClass.POWER
     _attr_native_unit_of_measurement = UnitOfPower.KILO_WATT
     _attr_state_class = "measurement"

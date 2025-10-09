@@ -1,0 +1,82 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Teknix Configuration",
+        "description": "Configure your Teknix device",
+        "data": {
+          "serial_number": "Serial Number",
+          "model": "Model"
+        },
+        "options": {
+          "model": {
+            "ESPRO 4.5": "ESPRO 4.5",
+            "ESPRO 6": "ESPRO 6",
+            "ESPRO 7.5": "ESPRO 7.5",
+            "ESPRO 9": "ESPRO 9",
+            "ESPRO 12": "ESPRO 12",
+            "ESPRO 15": "ESPRO 15",
+            "ESPRO 18": "ESPRO 18",
+            "ESPRO 21": "ESPRO 21",
+            "ESPRO 24": "ESPRO 24"
+          }
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Unable to connect to Teknix device",
+      "invalid_auth": "Invalid authentication",
+      "unknown": "Unexpected error occurred"
+    },
+    "abort": {
+      "already_configured": "Device is already configured",
+      "reauth_successful": "Re-authentication was successful"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Teknix Options",
+        "description": "Configure Teknix options"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "house_loop_temp": {
+        "name": "House Loop Temperature"
+      },
+      "tank_water_temp": {
+        "name": "Tank Temperature"
+      },
+      "house_target_temp": {
+        "name": "House Target Temperature"
+      },
+      "tank_target_temp": {
+        "name": "Tank Target Temperature"
+      },
+      "current_consumption": {
+        "name": "Current Consumption"
+      }
+    },
+    "switch": {
+      "boiler_power_state": {
+        "name": "Boiler Power"
+      },
+      "house_heating_active": {
+        "name": "House Heating"
+      },
+      "tank_heating_active": {
+        "name": "Tank Heating"
+      }
+    },
+    "number": {
+      "house_power_step": {
+        "name": "House Power Step"
+      },
+      "tank_power_step": {
+        "name": "Tank Power Step"
+      }
+    }
+  }
+}

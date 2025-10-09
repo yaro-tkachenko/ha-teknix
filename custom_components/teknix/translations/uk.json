@@ -1,0 +1,82 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Конфігурація Teknix",
+        "description": "Налаштуйте ваш пристрій Teknix",
+        "data": {
+          "serial_number": "Серійний номер",
+          "model": "Модель"
+        },
+        "options": {
+          "model": {
+            "ESPRO 4.5": "ESPRO 4.5",
+            "ESPRO 6": "ESPRO 6",
+            "ESPRO 7.5": "ESPRO 7.5",
+            "ESPRO 9": "ESPRO 9",
+            "ESPRO 12": "ESPRO 12",
+            "ESPRO 15": "ESPRO 15",
+            "ESPRO 18": "ESPRO 18",
+            "ESPRO 21": "ESPRO 21",
+            "ESPRO 24": "ESPRO 24"
+          }
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Неможливо підключитися до пристрою Teknix",
+      "invalid_auth": "Невірна автентифікація",
+      "unknown": "Сталася неочікувана помилка"
+    },
+    "abort": {
+      "already_configured": "Пристрій вже налаштований",
+      "reauth_successful": "Повторна автентифікація пройшла успішно"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Параметри Teknix",
+        "description": "Налаштуйте параметри Teknix"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "house_loop_temp": {
+        "name": "Температура контуру будинку"
+      },
+      "tank_water_temp": {
+        "name": "Температура води в баку"
+      },
+      "house_target_temp": {
+        "name": "Цільова температура будинку"
+      },
+      "tank_target_temp": {
+        "name": "Цільова температура бака"
+      },
+      "current_consumption": {
+        "name": "Поточне споживання"
+      }
+    },
+    "switch": {
+      "boiler_power_state": {
+        "name": "Живлення котла"
+      },
+      "house_heating_active": {
+        "name": "Обігрів будинку"
+      },
+      "tank_heating_active": {
+        "name": "Обігрів бака"
+      }
+    },
+    "number": {
+      "house_power_step": {
+        "name": "Крок потужності будинку"
+      },
+      "tank_power_step": {
+        "name": "Крок потужності бака"
+      }
+    }
+  }
+}

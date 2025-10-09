@@ -14,14 +14,14 @@ from .commands import (
 TARGETS = [
     {
         "key": "house_target_temp",
-        "name": "House Loop Target Temperature",
+        "translation_key": "house_target_temp",
         "min": 30,
         "max": 80,
         "step": 1,
     },
     {
         "key": "tank_target_temp",
-        "name": "Tank Target Temperature",
+        "translation_key": "tank_target_temp",
         "min": 30,
         "max": 80,
         "step": 1,
@@ -31,11 +31,11 @@ TARGETS = [
 POWER_STEPS = [
     {
         "key": "house_power_step",
-        "name": "House Power Step",
+        "translation_key": "house_power_step",
     },
     {
         "key": "tank_power_step",
-        "name": "Tank Power Step",
+        "translation_key": "tank_power_step",
     },
 ]
 
@@ -54,11 +54,11 @@ class BaseTeknixNumber(NumberEntity):
     _attr_has_entity_name = True
     _attr_mode = NumberMode.BOX
 
-    def __init__(self, hub, entry_id: str, key: str, name: str):
+    def __init__(self, hub, entry_id: str, key: str, translation_key: str):
         self._hub = hub
         self._entry_id = entry_id
         self._key = key
-        self._attr_name = name
+        self._attr_translation_key = translation_key
         self._attr_unique_id = f"{DOMAIN}:{entry_id}:num:{key}"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, getattr(self._hub, "serial", self._entry_id))},
@@ -74,7 +74,7 @@ class TeknixTargetTempNumber(BaseTeknixNumber):
     _attr_device_class = "temperature"
 
     def __init__(self, hub, entry_id: str, cfg: dict):
-        super().__init__(hub, entry_id, cfg["key"], cfg["name"])
+        super().__init__(hub, entry_id, cfg["key"], cfg["translation_key"])
         self._min = cfg["min"]
         self._max = cfg["max"]
         self._step = cfg["step"]
@@ -120,7 +120,7 @@ class TeknixTargetTempNumber(BaseTeknixNumber):
 
 class TeknixPowerStepNumber(BaseTeknixNumber):
     def __init__(self, hub, entry_id: str, cfg: dict):
-        super().__init__(hub, entry_id, cfg["key"], cfg["name"])
+        super().__init__(hub, entry_id, cfg["key"], cfg["translation_key"])
         self._hub.state.setdefault(self._key, 1)
 
     @property

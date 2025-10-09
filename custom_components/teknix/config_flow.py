@@ -2,6 +2,7 @@ from __future__ import annotations
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
+from homeassistant.helpers import selector
 from .const import DOMAIN, CONF_SERIAL, CONF_MODEL, MODELS
 
 class TeknixConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -16,8 +17,15 @@ class TeknixConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_create_entry(title=f"Teknix {user_input[CONF_MODEL]} ({serial})", data=user_input)
 
         schema = vol.Schema({
-            vol.Required(CONF_SERIAL): str,
-            vol.Required(CONF_MODEL): vol.In(list(MODELS)),
+            vol.Required(CONF_SERIAL): selector.TextSelector(
+                selector.TextSelectorConfig(type=selector.TextSelectorType.TEXT)
+            ),
+            vol.Required(CONF_MODEL): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=list(MODELS),
+                    translation_key="model"
+                )
+            ),
         })
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
 

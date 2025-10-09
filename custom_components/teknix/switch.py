@@ -22,9 +22,9 @@ from .commands import (
 _LOGGER = logging.getLogger(__name__)
 
 SWITCH_DESCS: list[SwitchEntityDescription] = [
-    SwitchEntityDescription(key="boiler_power_state", name="Boiler Power", icon="mdi:power"),
-    SwitchEntityDescription(key="house_heating_active", name="House Heating", icon="mdi:radiator"),
-    SwitchEntityDescription(key="tank_heating_active", name="Tank Heating", icon="mdi:water-boiler"),
+    SwitchEntityDescription(key="boiler_power_state", translation_key="boiler_power_state", icon="mdi:power"),
+    SwitchEntityDescription(key="house_heating_active", translation_key="house_heating_active", icon="mdi:radiator"),
+    SwitchEntityDescription(key="tank_heating_active", translation_key="tank_heating_active", icon="mdi:water-boiler"),
 ]
 
 async def async_setup_entry(hass, entry, async_add_entities):
