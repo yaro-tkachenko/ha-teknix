@@ -40,7 +40,7 @@ def build_house_heating_active_command(turn_on: bool) -> str:
 
 
 def build_tank_heating_active_command(turn_on: bool) -> str:
-    return "T13010005Z" if turn_on else "T13000004Z"
+    return "T13000005Z" if turn_on else "T13000004Z"
 
 # --- info command ---
 
