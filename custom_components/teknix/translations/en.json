@@ -7,7 +7,7 @@
         "data": {
           "serial_number": "Serial Number",
           "model": "Model"
-        },
+        }
       }
     },
     "error": {
