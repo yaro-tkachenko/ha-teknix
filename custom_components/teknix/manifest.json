@@ -1,15 +1,14 @@
 {
-    "domain": "teknix",
-    "name": "Teknix",
-    "codeowners": ["@yaro-tkachenko"],
-    "config_flow": true,
-    "documentation": "https://github.com/yaro-tkachenko/ha-teknix",
-    "integration_type": "device",
-    "iot_class": "local_polling",
-    "loggers": ["teknix"],
-    "requirements": [],
-    "dependencies": ["mqtt"],
-    "version": "0.1.3",
-    "translations": ["translations"]
-  }
+  "domain": "teknix",
+  "name": "Teknix",
+  "codeowners": ["@yaro-tkachenko"],
+  "config_flow": true,
+  "documentation": "https://github.com/yaro-tkachenko/ha-teknix",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "loggers": ["teknix"],
+  "requirements": [],
+  "dependencies": ["mqtt"],
+  "version": "0.1.3"
+}
   

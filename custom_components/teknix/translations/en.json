@@ -8,19 +8,6 @@
           "serial_number": "Serial Number",
           "model": "Model"
         },
-        "options": {
-          "model": {
-            "ESPRO 4.5": "ESPRO 4.5",
-            "ESPRO 6": "ESPRO 6",
-            "ESPRO 7.5": "ESPRO 7.5",
-            "ESPRO 9": "ESPRO 9",
-            "ESPRO 12": "ESPRO 12",
-            "ESPRO 15": "ESPRO 15",
-            "ESPRO 18": "ESPRO 18",
-            "ESPRO 21": "ESPRO 21",
-            "ESPRO 24": "ESPRO 24"
-          }
-        }
       }
     },
     "error": {

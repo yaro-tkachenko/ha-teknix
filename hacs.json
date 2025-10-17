@@ -2,5 +2,7 @@
   "name": "Teknix",
   "country": "UA",
   "homeassistant": "2023.10.0",
-  "render_readme": true
+  "render_readme": true,
+  "content_in_root": false,
+  "filename": "teknix"
 }
