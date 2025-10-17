@@ -57,17 +57,12 @@ If you have another model — feel free to test and report results via GitHub Is
 The easiest way to install this integration is via [HACS][hacs-url].  
 Click the button below:
 
-[![Add to HACS via My Home Assistant][hacs-install-image]][hacs-install-url]
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=yaro-tkachenko&repository=ha-teknix&category=Integration)
 
-If it doesn’t work, you can add this repository manually:
+### Manual Installation (not recommended)
 
-1. Open **HACS → Integrations → … → Custom repositories**
-2. Click **Add**
-3. Paste `https://github.com/yaro-tkachenko/ha-teknix` into the URL field
-4. Choose **Integration** as category
-5. Install **Heater ESPRO Integration** from the list
-
-📸 *[Placeholder for screenshot of HACS installation]*
+* Copy the entire `custom_components/teknix/` directory to your server's `<config>/custom_components` directory
+* Restart Home Assistant
 
 ---
 
