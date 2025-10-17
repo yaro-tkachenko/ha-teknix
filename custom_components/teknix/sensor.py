@@ -132,8 +132,8 @@ class TeknixCurrentConsumptionSensor(SensorEntity):
         tank_active = bool(s.get("tank_heating_active"))
 
         step_max = int(getattr(self._hub, "step_max", 6) or 6)
-        house_step = max(0, min(int(s.get("house_power_step", 0) or 0), step_max))
-        tank_step = max(0, min(int(s.get("tank_power_step", 0) or 0), step_max))
+        house_step = max(0, min(int(s.get("house_heating_step", 0) or 0), step_max))
+        tank_step = max(0, min(int(s.get("tank_heating_step", 0) or 0), step_max))
 
         element_kw = float(getattr(self._hub, "element_kw", 0.0) or 0.0)
         if element_kw <= 0:
@@ -159,8 +159,8 @@ class TeknixCurrentConsumptionSensor(SensorEntity):
             "max_step": getattr(self._hub, "step_max", None),
             "house_heating_active": s.get("house_heating_active"),
             "tank_heating_active": s.get("tank_heating_active"),
-            "house_power_step": s.get("house_power_step"),
-            "tank_power_step": s.get("tank_power_step"),
+            "house_heating_step": s.get("house_heating_step"),
+            "tank_heating_step": s.get("tank_heating_step"),
         }
 
     async def async_added_to_hass(self):

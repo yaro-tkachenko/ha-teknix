@@ -71,11 +71,11 @@
       }
     },
     "number": {
-      "house_power_step": {
-        "name": "Крок потужності будинку"
+      "house_heating_step": {
+        "name": "Рівень нагріву будинку"
       },
-      "tank_power_step": {
-        "name": "Крок потужності бака"
+      "tank_heating_step": {
+        "name": "Рівень нагріву бака"
       }
     }
   }

@@ -30,12 +30,12 @@ TARGETS = [
 
 POWER_STEPS = [
     {
-        "key": "house_power_step",
-        "translation_key": "house_power_step",
+        "key": "house_heating_step",
+        "translation_key": "house_heating_step",
     },
     {
-        "key": "tank_power_step",
-        "translation_key": "tank_power_step",
+        "key": "tank_heating_step",
+        "translation_key": "tank_heating_step",
     },
 ]
 
@@ -152,10 +152,10 @@ class TeknixPowerStepNumber(BaseTeknixNumber):
         if v > maxv:
             v = maxv
 
-        house_step = int(self._hub.state.get("house_power_step", 1))
-        tank_step = int(self._hub.state.get("tank_power_step", 1))
+        house_step = int(self._hub.state.get("house_heating_step", 1))
+        tank_step = int(self._hub.state.get("tank_heating_step", 1))
 
-        if self._key == "house_power_step":
+        if self._key == "house_heating_step":
             house_step = v
         else:
             tank_step = v
@@ -168,8 +168,8 @@ class TeknixPowerStepNumber(BaseTeknixNumber):
         await self._hub.publish(cmd)
         
         if hasattr(self._hub, "set_pending"):
-            self._hub.set_pending("house_power_step", house_step)
-            self._hub.set_pending("tank_power_step", tank_step)
+            self._hub.set_pending("house_heating_step", house_step)
+            self._hub.set_pending("tank_heating_step", tank_step)
 
         self._hub.state[self._key] = v
         self.async_write_ha_state()

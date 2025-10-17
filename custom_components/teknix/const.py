@@ -48,8 +48,8 @@ IDX = {
     "tank_target_temp": 8,
     "house_heating_active": 11,
     "tank_heating_active": 12,
-    "house_power_step": 18,
-    "tank_power_step": 19,
+    "house_heating_step": 18,
+    "tank_heating_step": 19,
     "house_loop_temp": 38,   # /10
     "tank_water_temp": 39,   # /10
 }

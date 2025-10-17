@@ -71,11 +71,11 @@
       }
     },
     "number": {
-      "house_power_step": {
-        "name": "House Power Step"
+      "house_heating_step": {
+        "name": "House Heating Level"
       },
-      "tank_power_step": {
-        "name": "Tank Power Step"
+      "tank_heating_step": {
+        "name": "Tank Heating Level"
       }
     }
   }
