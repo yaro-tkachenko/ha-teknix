@@ -64,7 +64,6 @@ class TeknixSensor(SensorEntity):
         self._entry_id = entry_id
         self.entity_description = desc
         self._attr_unique_id = f"{DOMAIN}_{entry_id}_{desc.key}"
-        self._attr_name = desc.name
         self._unsub = None
 
         self._attr_device_info = DeviceInfo(

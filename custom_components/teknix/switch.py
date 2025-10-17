@@ -41,7 +41,6 @@ class TeknixSwitch(SwitchEntity):
         self._entry_id = entry_id
         self.entity_description = desc
         self._attr_unique_id = f"{DOMAIN}:{entry_id}:sw:{desc.key}"
-        self._attr_name = desc.name
         self._unsub = None
 
         self._attr_device_info = DeviceInfo(
