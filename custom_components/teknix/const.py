@@ -11,6 +11,9 @@ DISPATCH_SIGNAL = f"{DOMAIN}_update"
 # INFO command interval in minutes
 INFO_COMMAND_INTERVAL_MINUTES = 1
 
+# PO1800NG command interval in minutes
+PO1800NG_COMMAND_INTERVAL_MINUTES = 3
+
 # MQTT topics (derived from serial)
 def cmd_topic(serial: str) -> str:
     return f"cmnd/tasmota_{serial}/SerialSend"

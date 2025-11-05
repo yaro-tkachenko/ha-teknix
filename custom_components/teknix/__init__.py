@@ -13,7 +13,7 @@ from homeassistant.helpers.storage import Store
 from .const import (
     DOMAIN, PLATFORMS, CONF_SERIAL, CONF_MODEL,
     DISPATCH_SIGNAL, model_max_step, cmd_topic, tele_topic, model_total_kw, model_element_kw,
-    INFO_COMMAND_INTERVAL_MINUTES,
+    INFO_COMMAND_INTERVAL_MINUTES, PO1800NG_COMMAND_INTERVAL_MINUTES,
 )
 from .parser import parse_info_message
 from .commands import build_info_command
@@ -32,6 +32,7 @@ class TeknixHub:
         self.device_id: str | None = None
         self._unsub_mqtt = None
         self._unsub_info_timer = None
+        self._unsub_po1800ng_timer = None
         
         self._store = Store(hass, 1, f"{DOMAIN}.{serial}")
         
@@ -58,8 +59,17 @@ class TeknixHub:
         )
         _LOGGER.info("Started periodic INFO command sending every minute")
         
+        # Start periodic PO1800NG command sending every 5 minutes
+        self._unsub_po1800ng_timer = async_track_time_interval(
+            self.hass, self._send_po1800ng_command, timedelta(minutes=PO1800NG_COMMAND_INTERVAL_MINUTES)
+        )
+        _LOGGER.info("Started periodic PO1800NG command sending every %d minutes", PO1800NG_COMMAND_INTERVAL_MINUTES)
+        
         # Send initial INFO command to get current state
         self._send_info_command()
+        
+        # Send initial PO1800NG command
+        self._send_po1800ng_command()
 
     async def async_stop(self) -> None:
         if self._unsub_mqtt:
@@ -70,6 +80,11 @@ class TeknixHub:
             self._unsub_info_timer()
             self._unsub_info_timer = None
             _LOGGER.info("Stopped periodic INFO command sending")
+        
+        if self._unsub_po1800ng_timer:
+            self._unsub_po1800ng_timer()
+            self._unsub_po1800ng_timer = None
+            _LOGGER.info("Stopped periodic PO1800NG command sending")
 
     @callback
     def _mqtt_message_received(self, msg) -> None:
@@ -119,6 +134,11 @@ class TeknixHub:
         """Send INFO command to request current state from teknix."""
         info_cmd = build_info_command()
         self.hass.create_task(self.async_send_command(info_cmd))
+
+    @callback
+    def _send_po1800ng_command(self, now=None) -> None:
+        """Send PO1800NG command periodically."""
+        self.hass.create_task(self.async_send_command("PO1800NG"))
 
     async def async_send_command(self, raw_cmd: str) -> None:
         topic = cmd_topic(self.serial)
